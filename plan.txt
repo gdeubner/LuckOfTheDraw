@@ -1,0 +1,21 @@
+Game Flow Design:
+
+Display title
+
+Start /instructions / quit
+
+- on instructions entered:
+
+    - display linstructions
+        - press enter to continue
+        - loop back to start / instructions / quit 
+
+- on Start entetered:
+
+    - ask for number of players (2-4)
+    - Game begins. May enter 'quit' to end game at any point in game
+
+Game begins:
+
+
+
