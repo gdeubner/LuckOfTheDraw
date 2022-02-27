@@ -17,5 +17,17 @@ Start /instructions / quit
 
 Game begins:
 
+- ask number of players: Enter 2, 3 or 4
 
+class structures
 
+player class
+- id = 1,2,3 or 4
+- name = "John"
+- score = 7
+- appropriate getters
+- incrementer/decrienter for score
+
+Card class
+- suit = Spade > Heart > Diamond > Club
+- value = (string) 0=penalty,1,2,3,4,5,6,7,8,9,10,11=J,12=Q,13=K,14=A,
