@@ -27,4 +27,20 @@ public class Card implements Comparable<Card>{
         } 
         return this.suit.compareTo(otherCard.getSuit());
     }
+
+
+    @Override
+    public String toString(){
+        String str;
+        if(value == 0){
+            str = "penalty card";
+        } else if (value > 10){
+            //deals with face value cards
+            str = FaceValues.values()[(value-11)] + " of " + suit.toString() + "s";
+        } else {
+            //deals with number cards
+            str = String.valueOf(value) + " of " + suit.toString() + "s";
+        }
+        return str;
+    }
 }

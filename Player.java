@@ -35,5 +35,11 @@ public class Player {
         score -= 1;
     }
 
+    @Override
+    public String toString(){
+        String str = "id: " + id + " name: " + name + " score: " + score;
+        return str;
+    }
+
 
 }
