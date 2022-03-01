@@ -102,7 +102,7 @@ class Play{
             }
             if(bestCardHolder >-1){
                 playerList[bestCardHolder].incrementScore();
-                System.out.println(playerList[bestCardHolder].getId() + "has won this round.");
+                System.out.println("Player" + playerList[bestCardHolder].getId() + " has won this round.");
             }
             printScoreboard(round, playerList);
 
