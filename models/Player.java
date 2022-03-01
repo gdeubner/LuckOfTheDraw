@@ -1,18 +1,13 @@
+package models;
 public class Player {
     private int id;
     private String name;
     private int score;
 
-    public Player (){
-        id = 0;
-        name = "";
-        score = 0;
-    }
-
-    public Player (int id, String name, int score) {
+    public Player (int id, String name) {
         this.id = id;
         this.name = name;
-        this.score = score;
+        score = 0;
     }
 
     public int getId(){
@@ -31,10 +26,11 @@ public class Player {
         score += 2;
     }
 
-    public void decrimentScore(){
+    public void decrementScore(){
         score -= 1;
     }
 
+    //for testing purposes
     @Override
     public String toString(){
         String str = "id: " + id + " name: " + name + " score: " + score;

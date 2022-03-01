@@ -1,10 +1,11 @@
+package models;
 public class Card implements Comparable<Card>{
 
     private Suit suit;
     private int value;
-    //number cards: 1-10
-    //Face Cards: 11 = Jack, 12 = Queen, 13 = King, 14 = Ave
-    //0 = penalty card
+    //number cards: 2-10
+    //Face Cards: 11 = Jack, 12 = Queen, 13 = King, 14 = Ace
+    //1 = penalty card
     
     public Card(Suit suit, int value){
         this.suit = suit;
@@ -21,7 +22,7 @@ public class Card implements Comparable<Card>{
 
     @Override
     public int compareTo(Card otherCard) {
-        int valueCompare = this.value - otherCard.getValue() ;
+        int valueCompare = this.value - otherCard.getValue();
         if (valueCompare != 0) {
             return valueCompare;
         } 
@@ -31,16 +32,18 @@ public class Card implements Comparable<Card>{
 
     @Override
     public String toString(){
-        String str;
-        if(value == 0){
-            str = "penalty card";
-        } else if (value > 10){
-            //deals with face value cards
-            str = FaceValues.values()[(value-11)] + " of " + suit.toString() + "s";
+        if(value == 1){
+            return "penalty card";
         } else {
-            //deals with number cards
-            str = String.valueOf(value) + " of " + suit.toString() + "s";
+            String str;
+            if (value > 10){
+                //deals with face value cards
+                str = "" + FaceValues.values()[(value-11)];
+            } else {
+                //deals with number cards
+                str = String.valueOf(value);
+            }
+            return str +  " of " + suit.toString() + "s";
         }
-        return str;
     }
 }

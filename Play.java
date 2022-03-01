@@ -1,10 +1,14 @@
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+
+import models.Card;
+import models.Deck;
+import models.Player;
 
 class Play{
     private static Scanner scanner;
 
+    //displays the title and allows user to choose between play/instructions/quit
     private static void pregame() throws InterruptedException{
         System.out.println("""
         Welcome to...
@@ -23,69 +27,130 @@ class Play{
 
             String response = scanner.nextLine();
 
-            switch (response.toLowerCase()) {
+            switch (response.toLowerCase().trim()) {
                 case "play":
                     startGame();
                     break;
-
                 case "instructions":
                     printInstructions();
                     continueLooping = true;
                     break;
-                
                 case "quit":
                     System.out.println("Bye bye!");
                     return;
-            
                 default:
                     System.out.println("Invalid input.");
                     continueLooping = true;
                     break;
             }
             System.out.println();
-
         }
-        
-
     }
 
+    //game logic
     private static void startGame() {
         //asks for the number of players and for their names
         Player[] playerList = getPlayers();
-
         int round = 1;
         Deck deck = new Deck();
-        //loops through each round, having players draw cards and changing their score
+        deck.shuffle();
+        //loops through each round, having players draw cards and changing their scores
+        System.out.println("(Note: you may exit the game at any time by holding Ctrl/Cmd - C)");
         while (true){
             if(round != 1) {
                 System.out.println("Press enter to start the next round.");
                 scanner.nextLine();
             }
             System.out.println("\n***Round " + round + "***\n");
-            Card[] roundCards = new Card[playerList.length];
 
-            //have each player draw a card
-            for(int i = 0; i < playerList.length; i++){
-                Player p = playerList[i];
-                System.out.println("Player" + p.getId() + ", please press enter to draw your card.");
-                String response = scanner.nextLine();
-                 if(response.length() > 1){
-                     System.out.println("you didn't follow my instructions, but I'll let it slide.");
-                } 
-                Card card = deck.drawCard();
-                roundCards[i] = card;
-                System.out.println("Player" + p.getId() + " drew...\nthe " + card.toString() + "\n");
+            //each player takes turns drawing a card
+            Card[] playerCards = drawCards(deck, playerList);
+
+            System.out.println("Press enter to see the results of the round.");
+            scanner.nextLine();
+
+            updatePlayerScores(playerCards, playerList);
+            
+            printScoreboard(round, playerList);
+            round++;
+            //if someone has won, declare the victor, exit the loop, and end the program
+            if(checkGameOver(playerList)){
+                break;
             }
+        }
+        System.out.println("Thanks for playing!");
+    }
 
-            //update player scores
-            Card bestCard = null;
+    //prompts the user for the number of players and asks for each player's name
+    private static Player[] getPlayers() {
+        Player[] playerList = null;
+    
+        while(playerList == null){
+            System.out.println("\nHow many players are there? Enter 2, 3, or 4.");
+            String response = scanner.nextLine().trim();
+            if(!(response.equals("2") || response.equals("3") || response.equals("4"))){
+                System.out.println("Invalid input.");
+            } else {
+                playerList = new Player[Integer.parseInt(response)];
+                break;
+            }
+        }
+        //asks each player for a unique, non-empty name under 50 characters
+        for(int i = 1; i <= playerList.length; i++){
+            boolean continueLooping = true;
+            while(continueLooping){
+                System.out.println("Player" + i +", please enter your name.");
+                String response = scanner.nextLine().trim();
+                if(response.length() < 50 && response.length() > 0){
+                    //make sure name is unique
+                    boolean isUnique = true;
+                    for(Player player : playerList){
+                        if(player != null && player.getName().equals(response)){
+                            isUnique = false;
+                            System.out.println("That name is already taken.");
+                            break;
+                        }
+                    }
+                    if(isUnique){
+                        continueLooping = false;
+                        playerList[i-1] = new Player(i, response);
+                    }                    
+                } else {
+                    System.out.println("That name was invalid. Try something else.");
+                }
+            }
+        }
+        return playerList;
+    }
+
+    //Each player is asked to draw a card from the deck.
+    private static Card[] drawCards(Deck deck, Player[] playerList){
+        Card[] playerCards = new Card[playerList.length];
+        for(int i = 0; i < playerList.length; i++){
+            Player currentPlayer = playerList[i];
+            System.out.println(currentPlayer.getName() + ", please press enter to draw your card.");
+            String response = scanner.nextLine();
+             if(response.length() > 1){
+                 System.out.println("you didn't follow my instructions, but I'll let it slide.");
+            } 
+            Card card = deck.drawCard();
+            playerCards[i] = card;
+            System.out.println(currentPlayer.getName() + " drew...\nthe " + card.toString() + "!\n");
+        }
+        return playerCards;
+    }
+
+    //Decrement player scores if a penalty card is drawn. Adds points to the winner's score.
+    //Announces the winner.
+    private static void updatePlayerScores(Card[] playerCards, Player[] playerList) {
+        Card bestCard = null;
             int bestCardHolder = -1;
-            for(int i = 0; i < roundCards.length; i++){
-                Card card = roundCards[i];
-                if(card.getValue() == 0){
-                    //penalty card - decriment player score
+            for(int i = 0; i < playerCards.length; i++){
+                Card card = playerCards[i];
+                if(card.getValue() == 1){
+                    //penalty card - decrement player score, but not below zero
                     if(playerList[i].getScore() > 0){
-                        playerList[i].decrimentScore();
+                        playerList[i].decrementScore();
                     }
                 } else {
                     if(bestCardHolder == -1){
@@ -102,72 +167,43 @@ class Play{
             }
             if(bestCardHolder >-1){
                 playerList[bestCardHolder].incrementScore();
-                System.out.println("Player" + playerList[bestCardHolder].getId() + " has won this round.");
+                System.out.println(playerList[bestCardHolder].getName() + " has won this round.");
+            } else {
+                System.out.println("Everyone drew penalty cards. Nobody winds this round. :(");
             }
-            printScoreboard(round, playerList);
-
-            round++;
-            //if someone has won, declare the victor, exit the loop, and end the program
-            Player winner = checkGameOver(playerList);
-            if(winner != null){
-                System.out.println("Player" + winner.getId() + " has won the game!");
-                System.out.println("Congrats " + winner.getName() + "!");
-                break;
-            }
-        }
-        System.out.println("Thanks for playng!");
     }
 
-    private static Player checkGameOver(Player[] arr) {
-        Player highestPlayer = arr[0];
-        for(int i = 1; i < arr.length; i++){
-            Player p = arr[i];
+    //checks to see if any player has met the conditions for winning the game
+    private static boolean checkGameOver(Player[] players) {
+        Player highestPlayer = players[0];
+        for(int i = 1; i < players.length; i++){
+            Player p = players[i];
             if(p.getScore() > highestPlayer.getScore() + 1){
                 highestPlayer = p;
             }
         }
         if( highestPlayer.getScore() >= 21){
-            return highestPlayer;
+            System.out.println("Player" + highestPlayer.getId() + " has won the game!");
+            System.out.println("Congrats " + highestPlayer.getName() + "!");
+            return true;
         }
-        return null;
+        return false;
     }
 
-    private static Player[] getPlayers() {
-        Player[] playerList = null;
-    
-        while(playerList == null){
-            System.out.println("\nHow many players are there? Enter 2, 3, or 4.");
-            String response = scanner.nextLine().trim();
-            if(!(response.equals("2") || response.equals("3") || response.equals("4"))){
-                System.out.println("Invalid input.");
-            } else {
-                playerList = new Player[Integer.parseInt(response)];
-                break;
-            }
-        }
-        for(int i = 1; i <= playerList.length; i++){
-            System.out.println("Player" + i +", please enter your name.");
-            String response = scanner.nextLine();
-            playerList[i-1] = new Player(i, response, 0);
-        }
-        return playerList;
-    }
-
-    private static void printScoreboard(int round, Player[] arr){
+    //prints the score board to console
+    private static void printScoreboard(int round, Player[] players){
         System.out.println("\n*************************");
         System.out.println("Scoreboard for round " + round + ":");
-        for (Player p : arr){
-            System.out.println("Player" + p.getId() + ": " + p.getScore());
+        for (Player player : players){
+            System.out.println("Player" + player.getId() + ": " + player.getName() + " " + player.getScore());
         }
         System.out.println("*************************\n");
 
     }
 
-
-
-
+    //reads the instructions from the .instructions file and prints them to console
     private static void printInstructions() {
-        File myObj = new File(".instructions");
+        File myObj = new File("./assets/instructions.txt");
         try{
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
@@ -175,14 +211,10 @@ class Play{
             }
             myReader.close();
         } catch (Exception e){
-            System.out.println(".instructions file not found or not readable");
+            System.out.println("instructions file not found or not readable.");
         }
         
     }
-
-
-
-
     public static void main (String[] args) {
         scanner = new Scanner(System.in);
         try {
