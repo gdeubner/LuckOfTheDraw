@@ -1,6 +1,6 @@
-# Luck of the Draw
+Luck of the Draw
 
-## Description:
+Description:
 
 This is a simple card game based on chance.
 Each round, players take turns drawing a card
@@ -13,21 +13,18 @@ is a player at the end of a round who has 21 points
 or more and has a score that is at least 2
 points greater than all other players.
 
-## Requirements:
+Requirements:
 
-Java 17.0.2 or greater
+- Java 17.0.2 or greater
 (PLEASE NOTE: the project will NOT run with an older version of Java)
 
-
-## Instructions for running:
+Instructions for running:
 
 - open a terminal
 - cd to the folder containing this file
 - run commands:
 
-```bash
-javac Play.java
-java Play
-```
+    javac Play.java
+    java Play
 
 - follow the on screen instructions and enjoy!

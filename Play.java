@@ -144,45 +144,56 @@ class Play{
     //Announces the winner.
     private static void updatePlayerScores(Card[] playerCards, Player[] playerList) {
         Card bestCard = null;
-            int bestCardHolder = -1;
-            for(int i = 0; i < playerCards.length; i++){
-                Card card = playerCards[i];
-                if(card.getValue() == 1){
-                    //penalty card - decrement player score, but not below zero
-                    if(playerList[i].getScore() > 0){
-                        playerList[i].decrementScore();
-                    }
+        int bestCardHolder = -1;
+        for(int i = 0; i < playerCards.length; i++){
+            Card card = playerCards[i];
+            if(card.getValue() == 1){
+                //penalty card - decrement player score, but not below zero
+                if(playerList[i].getScore() > 0){
+                    playerList[i].decrementScore();
+                }
+            } else {
+                 if(bestCardHolder == -1){
+                    //assigns bestCard to the first non-penalty card
+                    bestCard = card;
+                    bestCardHolder = i;
                 } else {
-                    if(bestCardHolder == -1){
-                        //assigns bestCard to the first non-penalty card
+                    if(card.compareTo(bestCard) > 0){
                         bestCard = card;
                         bestCardHolder = i;
-                    } else {
-                        if(card.compareTo(bestCard) > 0){
-                            bestCard = card;
-                            bestCardHolder = i;
-                        }
                     }
                 }
             }
-            if(bestCardHolder >-1){
-                playerList[bestCardHolder].incrementScore();
-                System.out.println(playerList[bestCardHolder].getName() + " has won this round.");
-            } else {
-                System.out.println("Everyone drew penalty cards. Nobody winds this round. :(");
-            }
+        }
+        //if at least one person has drawn a non-penalty card, a round winner is declared
+        if(bestCardHolder >-1){
+            playerList[bestCardHolder].incrementScore();
+            System.out.println(playerList[bestCardHolder].getName() + " has won this round.");
+        } else {
+            System.out.println("Everyone drew penalty cards. Nobody winds this round. :(");
+        }
     }
 
     //checks to see if any player has met the conditions for winning the game
-    private static boolean checkGameOver(Player[] players) {
-        Player highestPlayer = players[0];
-        for(int i = 1; i < players.length; i++){
-            Player p = players[i];
-            if(p.getScore() > highestPlayer.getScore() + 1){
-                highestPlayer = p;
-            }
+    //conditions: player score >= 21, player player has highest score by 2 points
+    private static boolean checkGameOver(Player[] playerList) {
+        Player highestPlayer = null;
+        Player secondHighestPlayer = null;
+        int topScore = -1;
+        int secondHighestScore = -1;
+        //finds highest 2 player scores
+        for(int i = 0; i < playerList.length; i++){
+           if(playerList[i].getScore() >= topScore){
+               secondHighestPlayer = highestPlayer;
+               highestPlayer = playerList[i];
+               secondHighestScore = topScore;
+               topScore = highestPlayer.getScore();
+           } else if (playerList[i].getScore() >= secondHighestScore){
+               secondHighestPlayer = playerList[i];
+           }
         }
-        if( highestPlayer.getScore() >= 21){
+        //checks win conditions
+        if(topScore >= 21 && secondHighestPlayer.getScore() + 1 < topScore){
             System.out.println("Player" + highestPlayer.getId() + " has won the game!");
             System.out.println("Congrats " + highestPlayer.getName() + "!");
             return true;

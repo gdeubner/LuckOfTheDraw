@@ -10,6 +10,10 @@ public class Player {
         score = 0;
     }
 
+    public void setScore(int num){
+        score = num;
+    }
+
     public int getId(){
         return id;
     }
